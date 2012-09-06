@@ -1,1 +1,2 @@
-(ns overblow.core)
+(ns overblow.core
+  (:use [overtone.live]))
