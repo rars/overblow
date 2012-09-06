@@ -1,6 +1,12 @@
 (ns overblow.shared.richard
   (:use [overblow.shared.core]))
 
+;; Telephone synth for producing DTMF sound
+(defsynth dtmf-synth [f1 440 f2 220 amp 0.2]
+  (let [env (envelope [1 1 0] [0.2 0])
+        e   (env-gen env :action FREE)]
+    (out 0 (pan2 (* amp (* e (+ (sin-osc f1) (sin-osc f2))))))))
+
 ;; DTMF frequencies for each digit
 (def dtmf (cons [941 1336] (for [x [697 770 852] y [1209 1336 1477]] [x y])))
 
@@ -12,6 +18,18 @@
           next-beat (+ beat separation)]
       (at (metro beat) (inst a b))
       (apply-at (metro next-beat) #(play-dial-tone metro next-beat separation inst (rest sequence))))))
+
+(defn play-dial-tone
+  [metro beat seps inst sequence]
+  (when (not (= '() sequence))
+    (let [a (first (first sequence))
+          b (second (first sequence))
+          separation (first seps)
+          next-beat (+ beat separation)]
+      (at (metro beat) (inst a b))
+      (apply-at (metro next-beat) #(play-dial-tone metro next-beat (rest seps) inst (rest sequence))))))
+
+
 
 (defn gen-dial-random-seq
   "Generates a random sequence of n DTMF frequency pairs."
@@ -47,6 +65,15 @@
       (/ (- n wait) transition)
       1)))
 
+(defn exp-edge
+  "If n < wait returns 0, if n > (wait + transition) returns 1,
+   otherwise returns a linear interpolation between 0 and 1 according to its
+   position inbetween wait and transition. i.e. returns ((n-wait)/transition)."
+  [wait k n]
+  (if (< n wait)
+    1
+    (Math/exp (- 0 (* k (- n wait))))))
+
 (defn gen-smooth-dial-seq
   " Generates a random dial sequence of length n that linearly interpolates
     from atonal to tonal in n steps."
@@ -68,6 +95,14 @@
 ;; Insert your phone number into the sequence to dial it!
 (play-dial-tone metro (metro) 1.0 dtmf-synth (gen-dial-seq '(0 1 2 3 4)))
 
+
+
+
+(play-dial-tone metro (metro)
+                (map (fn [x] (+ 0.25 (* 1 (exp-edge 5 0.1 x)))) (range))
+                dtmf-synth (gen-smooth-riseedge-dial-seq 10 10))
+
+(stop)
 
   ;; 697 -> 698.5 F5
   ;; 770 -> 830 G#5
