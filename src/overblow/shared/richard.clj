@@ -97,10 +97,15 @@
 
 
 
+(defn play-accelerating-seq
+  [min-sep max-sep time-change-wait k freq-change-wait freq-change-duration]
+  (play-dial-tone metro (metro)
+                  (map (fn [x] (+ min-sep (* max-sep (exp-edge time-change-wait k x))))
+                       (range))
+                  dtmf-synth (gen-smooth-riseedge-dial-seq freq-change-wait freq-change-duration)))
 
-(play-dial-tone metro (metro)
-                (map (fn [x] (+ 0.25 (* 1 (exp-edge 5 0.1 x)))) (range))
-                dtmf-synth (gen-smooth-riseedge-dial-seq 10 10))
+(play-accelerating-seq 0.25 1 5 0.1 10 10)
+
 
 (stop)
 
