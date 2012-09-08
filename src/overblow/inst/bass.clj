@@ -16,4 +16,11 @@
    sus 0.8
    rel 1.0]
   (let [env (env-gen (adsr att decay sus rel) gate :action FREE)])
+  (mix [(square 120) (saw 123)])
+
   (sin-osc freq))
+
+
+(definst pluck-bass
+  [freq 440]
+  (pluck (* (square freq) (env-gen (perc 0.001 2) :action FREE)) 1 3 (/ 1 freq)))

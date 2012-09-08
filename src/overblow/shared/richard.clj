@@ -1,7 +1,12 @@
 (ns overblow.shared.richard
   (:use [overblow.shared.core]))
 
-;; Telephone synth for producing DTMF sound
+(definst siren [freq 440 freqchange 100 pulserate 2] (sin-osc (+ freq (* freqchange (sin-osc pulserate)))))
+
+(definst strange-sound
+  [freq]
+  (sin-osc freq (* 35 (sin-osc 2))))
+
 (defsynth dtmf-synth [f1 440 f2 220 amp 0.2]
   (let [env (envelope [1 1 0] [0.2 0])
         e   (env-gen env :action FREE)]
