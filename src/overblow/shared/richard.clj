@@ -172,7 +172,7 @@
 
 (def tuning (atom 0))
 (def separation (atom 1))
-(def freq-grid (atom (dtmf-tuned dtmf (chord :f4 :major) 10 100)))
+(def tuned-freq-grid (atom (freq-grid (dtmf-tuned-list dtmf-freqs (chord :f4 :major) 60 80))))
 
 (defn gen-smooth-dial-seq [alpha-atom freq-grid]
   (map (fn [x]
@@ -223,12 +223,17 @@
 
 (reset! tuning 0)
 (reset! separation 1)
-(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning freq-grid))
+(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning tuned-freq-grid))
 
-(lin-ramp-atom tuning 10000 1)
+(lin-ramp-atom tuning 5000 1)
 (exp-ramp-atom separation 10000 0.25)
 
-(reset! freq-grid (dtmf-tuned dtmf (chord :c4 :major) 10 100))
+(reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs (chord :f4 :minor) 60 80)))
+
+
+(on-event :midi-note-down (fn [event]
+                              (funky-bass (:note event)))
+                            ::midi-note-down-hdlr)
 
 
   ;; 697 -> 698.5 F5
