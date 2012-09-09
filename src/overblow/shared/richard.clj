@@ -152,6 +152,12 @@
       large-freq
       small-freq)))
 
+(defn n-from-sequence
+  [n sequence]
+  (let [length (count sequence)
+        indices (for [x (range n)] (Math/floor (* (- length 1) (/ x (- n 1)))))]
+    ; (clojure.pprint/pprint indices)
+    (for [x indices] (nth sequence x))))
 (println (sort (frequencies-in-chord (chord :c4 :major) 30 100)))
 
 (find-nearest 1230 (frequencies-in-chord (chord :c4 :major) 30 100))
@@ -188,7 +194,7 @@
       (at (metro beat) (inst a b))
       (apply-at (metro next-beat) #(play-dial-tone metro next-beat sep-atom inst (rest sequence))))))
 
-(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning))
+(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning tuned-freq-grid))
 
 (reset! tuning 1)
 (reset! tuning 0)
@@ -233,13 +239,14 @@
 ;; Doesn't seem to work at the moment.
 (def piano-notes (atom #{}))
 
-(on-event :midi-note-down (fn [event]
-                            (println event)
-                            (swap! piano-notes #(conj % (:note event)))
-                            (println @piano-notes))
-          ::midi-note-down-hdlr)
+(on-event [:midi :note-on] (fn [{note :note velocity :velocity timestamp :timestamp}]
+                             (swap! piano-notes #(conj % note))
+                             (reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs @piano-notes 60 80)))
+                             (println @piano-notes)
+                             )
+          ::echo)
 
-(on-event :midi-note-up (fn [event]
+(on-event [:midi :note-off] (fn [event]
                             (swap! piano-notes #(disj % (:note event))))
                             ::midi-note-up-hdlr)
 
@@ -250,11 +257,3 @@
   ;; 1209 -> 1397 F6
   ;; 1336 -> 1661 G#6
  ;; 1477 -> 2093 C7
-
-
-(defn n-from-sequence
-  [n sequence]
-  (let [length (count sequence)
-        indices (for [x (range n)] (Math/floor (* (- length 1) (/ x (- n 1)))))]
-    ; (clojure.pprint/pprint indices)
-    (for [x indices] (nth sequence x))))
