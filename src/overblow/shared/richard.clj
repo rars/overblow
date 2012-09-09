@@ -122,6 +122,45 @@
 
 (stop)
 
+;; Auto freq lookup
+
+(defn note-to-all-octaves
+  [note min-note max-note]
+  (clojure.set/union
+   (loop [x note notes []]
+     (if (< x min-note)
+       (set notes)
+       (recur (- x 12) (conj notes x))))
+   (loop [x note notes []]
+     (if (> x max-note)
+       (set notes)
+       (recur (+ x 12) (conj notes x))))))
+
+(defn frequencies-in-chord
+  [chord min-note max-note]
+  (let [notes (apply clojure.set/union
+                   (map (fn [x] (note-to-all-octaves x min-note max-note)) chord))
+        freqs (map midi->hz notes)]
+    freqs))
+
+(defn find-nearest
+  [freq freq-set]
+  (let [groups (group-by (fn [x] (> x freq)) freq-set)
+        large-freq (reduce min (groups true))
+        small-freq (reduce max (groups false))]
+    (if (< (- large-freq freq) (- freq small-freq))
+      large-freq
+      small-freq)))
+
+(println (sort (frequencies-in-chord (chord :c4 :major) 30 100)))
+
+(find-nearest 1230 (frequencies-in-chord (chord :c4 :major) 30 100))
+
+(defn dtmf-tuned
+  [pairs chord min-note max-note]
+  (let [freq-set (frequencies-in-chord chord min-note max-note)
+        freq-mapping (fn [x] (find-nearest x freq-set))]
+    (map (fn [[x y]] [(freq-mapping x) (freq-mapping y)]) pairs)))
 
 ;; New stuff using atoms
 
@@ -191,41 +230,3 @@
   ;; 1209 -> 1397 F6
   ;; 1336 -> 1661 G#6
  ;; 1477 -> 2093 C7
-
-(defn note-to-all-octaves
-  [note min-note max-note]
-  (clojure.set/union
-   (loop [x note notes []]
-     (if (< x min-note)
-       (set notes)
-       (recur (- x 12) (conj notes x))))
-   (loop [x note notes []]
-     (if (> x max-note)
-       (set notes)
-       (recur (+ x 12) (conj notes x))))))
-
-(defn frequencies-in-chord
-  [chord min-note max-note]
-  (let [notes (apply clojure.set/union
-                   (map (fn [x] (note-to-all-octaves x min-note max-note)) chord))
-        freqs (map midi->hz notes)]
-    freqs))
-
-(defn find-nearest
-  [freq freq-set]
-  (let [groups (group-by (fn [x] (> x freq)) freq-set)
-        large-freq (reduce min (groups true))
-        small-freq (reduce max (groups false))]
-    (if (< (- large-freq freq) (- freq small-freq))
-      large-freq
-      small-freq)))
-
-(println (sort (frequencies-in-chord (chord :c4 :major) 30 100)))
-
-(find-nearest 1230 (frequencies-in-chord (chord :c4 :major) 30 100))
-
-(defn dtmf-tuned
-  [pairs chord min-note max-note]
-  (let [freq-set (frequencies-in-chord chord min-note max-note)
-        freq-mapping (fn [x] (find-nearest x freq-set))]
-    (map (fn [[x y]] [(freq-mapping x) (freq-mapping y)]) pairs)))
