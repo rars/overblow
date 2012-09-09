@@ -8,8 +8,8 @@
   [freq]
   (sin-osc freq (* 35 (sin-osc 2))))
 
-(defsynth dtmf-synth [f1 440 f2 220 amp 0.2]
-  (let [env (envelope [1 1 0] [0.2 0])
+(defsynth dtmf-synth [f1 440 f2 220 amp 0.05]
+  (let [env (envelope [0 1 1 0] [0.01 0.19 0.1])
         e   (env-gen env :action FREE)]
     (out 0 (pan2 (* amp (* e (+ (sin-osc f1) (sin-osc f2))))))))
 
@@ -117,7 +117,7 @@
                        (range))
                   dtmf-synth (gen-smooth-riseedge-dial-seq freq-change-wait freq-change-duration)))
 
-(play-accelerating-seq 0.25 1 5 0.1 10 10)
+;;(play-accelerating-seq 0.25 1 5 0.1 10 10)
 
 
 (stop)
@@ -158,9 +158,9 @@
         indices (for [x (range n)] (Math/floor (* (- length 1) (/ x (- n 1)))))]
     ; (clojure.pprint/pprint indices)
     (for [x indices] (nth sequence x))))
-(println (sort (frequencies-in-chord (chord :c4 :major) 30 100)))
+;;(println (sort (frequencies-in-chord (chord :c4 :major) 30 100)))
 
-(find-nearest 1230 (frequencies-in-chord (chord :c4 :major) 30 100))
+;;(find-nearest 1230 (frequencies-in-chord (chord :c4 :major) 30 100))
 
 (defn dtmf-tuned-list
   [freq-sequence chord min-note max-note]
@@ -194,10 +194,10 @@
       (at (metro beat) (inst a b))
       (apply-at (metro next-beat) #(play-dial-tone metro next-beat sep-atom inst (rest sequence))))))
 
-(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning tuned-freq-grid))
+;;(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning tuned-freq-grid))
 
-(reset! tuning 1)
-(reset! tuning 0)
+;;(reset! tuning 1)
+;;(reset! tuning 0)
 
 (defn lin-ramp-atom [a duration target]
   (future
@@ -211,7 +211,7 @@
           (Thread/sleep 10))
         (reset! a target)))))
 
-(lin-ramp-atom tuning 3000 1)
+;;(lin-ramp-atom tuning 3000 1)
 
 (defn exp-ramp-atom [a duration target]
   (future
@@ -229,19 +229,19 @@
 
 (reset! tuning 0)
 (reset! separation 1)
-(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning tuned-freq-grid))
+(play-dial-tone overblow.rhythm.perc/metro (overblow.rhythm.perc/metro) separation dtmf-synth (gen-smooth-dial-seq tuning tuned-freq-grid))
 
 (lin-ramp-atom tuning 5000 1)
 (exp-ramp-atom separation 10000 0.25)
 
-(reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs (chord :f4 :minor) 60 80)))
+(reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs (chord :f4 :minor) 30 40)))
 
-;; Doesn't seem to work at the moment.
+
 (def piano-notes (atom #{}))
 
 (on-event [:midi :note-on] (fn [{note :note velocity :velocity timestamp :timestamp}]
                              (swap! piano-notes #(conj % note))
-                             (reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs @piano-notes 60 80)))
+                             (reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs @piano-notes (apply min @piano-notes) (apply max @piano-notes))))
                              (println @piano-notes)
                              )
           ::echo)
@@ -249,11 +249,3 @@
 (on-event [:midi :note-off] (fn [event]
                             (swap! piano-notes #(disj % (:note event))))
                             ::midi-note-up-hdlr)
-
-  ;; 697 -> 698.5 F5
-  ;; 770 -> 830 G#5
-  ;; 852 -> 1047 C6
-  ;; 941 -> 523 C5
-  ;; 1209 -> 1397 F6
-  ;; 1336 -> 1661 G#6
- ;; 1477 -> 2093 C7
