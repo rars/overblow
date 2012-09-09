@@ -162,6 +162,7 @@
         freq-mapping (fn [x] (find-nearest x freq-set))]
     (map (fn [[x y]] [(freq-mapping x) (freq-mapping y)]) pairs)))
 
+
 ;; New stuff using atoms
 
 (def tuning (atom 0))
@@ -217,10 +218,12 @@
 
 (reset! tuning 0)
 (reset! separation 1)
-(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning))
+(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning freq-grid))
 
 (lin-ramp-atom tuning 10000 1)
 (exp-ramp-atom separation 10000 0.25)
+
+(reset! freq-grid (dtmf-tuned dtmf (chord :c4 :major) 10 100))
 
 
   ;; 697 -> 698.5 F5
