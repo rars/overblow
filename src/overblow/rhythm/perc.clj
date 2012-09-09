@@ -2,6 +2,8 @@
   (:use [overtone.live]
         [overtone.inst.drum]))
 
+(def metro (metronome 128))
+
 (defn pattern-to-times
   [pattern beat elements-per-beat metro]
   (let [beats (map (fn [x y] (if (= x 1) (+ beat (/ y elements-per-beat)) 0)) pattern (range))]
@@ -20,6 +22,13 @@
   [inst pattern note-len beat metro]
   (let [times (pattern-to-times pattern beat note-len metro)]
     (doseq [t times] (at t (inst)))))
+
+(defn sequence-vary-pattern
+  [inst-list pattern note-len beat metro]
+  (let [times (pattern-to-times pattern beat note-len metro)
+        time-inst-pairs (map vector times inst-list)]
+    (dorun (for [[time inst] time-inst-pairs]
+             (at time (inst))))))
 
 (defn sequence-triplet-pattern
   [inst pattern note-len beat metro]
@@ -48,6 +57,59 @@
     (sequence-pattern bass bass-pattern 4 beat metro)
     (sequence-pattern hat hat-pattern 4 beat metro)
     (sequence-pattern block block-pattern 4 beat metro)))
+
+
+(defn shat1 [] (sample-player (sample (freesound-path 3721))))
+
+(defn ssnare1 [] (sample-player (sample (freesound-path 26903))))
+(defn ssnare2 [] (sample-player (sample (freesound-path 38927))))
+(defn ssnare3 [] (sample-player (sample (freesound-path 774))))
+(defn ssnare4 [] (sample-player (sample (freesound-path 441))))
+(defn ssnare5 [] (sample-player (sample (freesound-path 442))))
+
+(defn bongo1 [] (sample-player (sample (freesound-path 29801))))
+(defn bongo2 [] (sample-player (sample (freesound-path 69053))))
+(defn bongo3 [] (sample-player (sample (freesound-path 69052))))
+(defn bongo4 [] (sample-player (sample (freesound-path 99754))))
+(defn bongo5 [] (sample-player (sample (freesound-path 57136))))
+(defn bongo6 [] (sample-player (sample (freesound-path 69051))))
+(defn bongo7 [] (sample-player (sample (freesound-path 57138))))
+
+(defn bongo-pattern
+  [bass hat block beat metro]
+  (let [bongo-insts [bongo1 bongo3 bongo4 bongo5 bongo6 bongo7]
+        bongo-seq (sample-from 16 bongo-insts)
+        small-pattern [1 1 1 0]
+        big-pattern [0 0 0 1]
+        scrape-pattern [0 1 0 0 1 1 0 1 0 1 1 1 1 0 0 0]
+      ]
+    (sequence-pattern bongo1 small-pattern 1 beat metro)
+    (sequence-pattern bongo2 big-pattern 1 beat metro)
+    (sequence-vary-pattern bongo-seq scrape-pattern 4 beat metro)
+  ))
+
+
+(defn sample-from
+  [n collection]
+  (let [indexes (repeatedly  #(rand-int (count collection)))
+        ]
+    (take n (map (fn [x] (nth collection x)) indexes))))
+
+(defn samba-vary
+  " A samba pattern in common time. Plays for 4 beats starting at beat at the
+    tempo described by metro. bass, hat and block are the three instruments used
+    in the pattern. "
+  [bass hat block beat metro]
+  (let [bass-pattern (cons 1 (take 14 (flatten (repeat 4 [0 0 1 1]))))
+        hat-insts [shat1]
+        hat-pattern (take 16 (rest  (flatten (repeat 5 [0 0 0 1]))))
+        block-pattern (take 16 (flatten (repeat 3 [1 0 1 0 1 1 0])))
+        insts [ssnare1 ssnare2 ssnare4 ssnare5]
+        inst-seq (sample-from 16 insts)]
+    (sequence-pattern bass bass-pattern 4 beat metro)
+    (sequence-vary-pattern hat-insts hat-pattern 4 beat metro)
+    (sequence-vary-pattern inst-seq block-pattern 4 beat metro)))
+
 
 (defn reggae
   [bass hat block beat metro]
@@ -137,4 +199,4 @@
 
 (play-pattern #(bossa-nova quick-kick closed-hat open-hat %1 metro) (metro) metro 8)
 
-(play-pattern #(reggae kick3 closed-hat noise-snare %1 metro) (metro) metro 4)
+(play-pattern #(funky kick3 closed-hat ssnare3 %1 metro) (metro) metro 4)

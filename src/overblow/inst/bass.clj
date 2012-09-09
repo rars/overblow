@@ -21,6 +21,7 @@
   (sin-osc freq))
 
 
+
 (definst pluck-bass
   [freq 440]
   (pluck (* (square freq) (env-gen (perc 0.001 2) :action FREE)) 1 3 (/ 1 freq)))

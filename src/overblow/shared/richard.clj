@@ -126,15 +126,9 @@
 
 (defn note-to-all-octaves
   [note min-note max-note]
-  (clojure.set/union
-   (loop [x note notes []]
-     (if (< x min-note)
-       (set notes)
-       (recur (- x 12) (conj notes x))))
-   (loop [x note notes []]
-     (if (> x max-note)
-       (set notes)
-       (recur (+ x 12) (conj notes x))))))
+  (drop-while (fn [x] (< x min-note))
+              (take-while (fn [z] (< z max-note))
+                          (iterate (fn [y] (+ y 12)) (mod note 12)))))
 
 (defn frequencies-in-chord
   [chord min-note max-note]
