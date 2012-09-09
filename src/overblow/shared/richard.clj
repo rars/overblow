@@ -1,6 +1,6 @@
 (ns overblow.shared.richard
   (:use [overblow.shared.core]
-        [overtone.core]))
+        [overtone.live]))
 
 (definst siren [freq 440 freqchange 100 pulserate 2] (sin-osc (+ freq (* freqchange (sin-osc pulserate)))))
 
