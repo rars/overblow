@@ -8,7 +8,7 @@
   [freq]
   (sin-osc freq (* 35 (sin-osc 2))))
 
-(defsynth dtmf-synth [f1 440 f2 220 amp 0.05]
+(defsynth dtmf-synth [f1 440 f2 220 amp 0.2]
   (let [env (envelope [0 1 1 0] [0.01 0.19 0.1])
         e   (env-gen env :action FREE)]
     (out 0 (pan2 (* amp (* e (+ (sin-osc f1) (sin-osc f2))))))))
@@ -228,11 +228,11 @@
 
 
 (reset! tuning 0)
-(reset! separation 1)
+(reset! separation 0.5)
 (play-dial-tone overblow.rhythm.perc/metro (overblow.rhythm.perc/metro) separation dtmf-synth (gen-smooth-dial-seq tuning tuned-freq-grid))
 
 (lin-ramp-atom tuning 5000 1)
-(exp-ramp-atom separation 10000 0.25)
+(exp-ramp-atom separation 10000 0.5)
 
 (reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs (chord :f4 :minor) 30 40)))
 
