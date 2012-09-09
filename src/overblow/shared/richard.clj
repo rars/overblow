@@ -230,11 +230,18 @@
 
 (reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs (chord :f4 :minor) 60 80)))
 
+;; Doesn't seem to work at the moment.
+(def piano-notes (atom #{}))
 
 (on-event :midi-note-down (fn [event]
-                              (funky-bass (:note event)))
-                            ::midi-note-down-hdlr)
+                            (println event)
+                            (swap! piano-notes #(conj % (:note event)))
+                            (println @piano-notes))
+          ::midi-note-down-hdlr)
 
+(on-event :midi-note-up (fn [event]
+                            (swap! piano-notes #(disj % (:note event))))
+                            ::midi-note-up-hdlr)
 
   ;; 697 -> 698.5 F5
   ;; 770 -> 830 G#5
