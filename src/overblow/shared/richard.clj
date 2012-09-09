@@ -1,5 +1,6 @@
 (ns overblow.shared.richard
-  (:use [overblow.shared.core]))
+  (:use [overblow.shared.core]
+        [overtone.core]))
 
 (definst siren [freq 440 freqchange 100 pulserate 2] (sin-osc (+ freq (* freqchange (sin-osc pulserate)))))
 
@@ -14,6 +15,7 @@
 
 ;; DTMF frequencies for each digit
 (def dtmf (cons [941 1336] (for [x [697 770 852] y [1209 1336 1477]] [x y])))
+
 
 (defn play-dial-tone
   [metro beat separation inst sequence]
@@ -98,9 +100,7 @@
        (map (fn [x] (rising-edge wait transition x)) (range))))
 
 ;; Insert your phone number into the sequence to dial it!
-(play-dial-tone metro (metro) 1.0 dtmf-synth (gen-dial-seq '(0 1 2 3 4)))
-
-
+(play-dial-tone metro (metro) (repeat 1.0) dtmf-synth (gen-dial-seq '(0 1 2 3 4)))
 
 (defn play-accelerating-seq
   [min-sep max-sep time-change-wait k freq-change-wait freq-change-duration]
@@ -113,6 +113,67 @@
 
 
 (stop)
+
+
+;; New stuff using atoms
+
+(def tuning (atom 0))
+(def separation (atom 1))
+
+(defn gen-smooth-dial-seq [alpha-atom]
+  (map (fn [x]
+         (dialtone-lookup-smoothed-freq @alpha-atom x))
+       (repeatedly (fn [] (rand-int 10)))))
+
+(defn play-dial-tone
+  [metro beat sep-atom inst sequence]
+  (when (not (= '() sequence))
+    (let [a (first (first sequence))
+          b (second (first sequence))
+          next-beat (+ beat @sep-atom)]
+      (at (metro beat) (inst a b))
+      (apply-at (metro next-beat) #(play-dial-tone metro next-beat sep-atom inst (rest sequence))))))
+
+(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning))
+
+(reset! tuning 1)
+(reset! tuning 0)
+
+(defn lin-ramp-atom [a duration target]
+  (future
+    (when (not= (float @a) (float target))
+      (let [start-val  @a
+            start-time (System/currentTimeMillis)
+            end-time   (+ start-time duration)]
+        (while (< (System/currentTimeMillis) end-time)
+          (let [alpha (/ (- (System/currentTimeMillis) start-time) duration)]
+            (reset! a (+ (* (- 1 alpha) start-val) (* alpha target))))
+          (Thread/sleep 10))
+        (reset! a target)))))
+
+(lin-ramp-atom tuning 3000 0)
+
+(defn exp-ramp-atom [a duration target]
+  (future
+    (when (not= (float @a) (float target))
+      (let [start-val  @a
+            start-time (System/currentTimeMillis)
+            end-time   (+ start-time duration)]
+        (while (< (System/currentTimeMillis) end-time)
+          (let [k 5 ;; Get to 0.006 by 1
+                alpha (Math/exp (- (* k (/ (- (System/currentTimeMillis) start-time) duration))))]
+            (reset! a (+ (* alpha start-val) (* (- 1 alpha) target))))
+          (Thread/sleep 10))
+        (reset! a target)))))
+
+
+(reset! tuning 0)
+(reset! separation 1)
+(play-dial-tone metro (metro) separation dtmf-synth (smooth-dial-seq tuning))
+
+(lin-ramp-atom tuning 10000 1)
+(exp-ramp-atom separation 10000 0.25)
+
 
   ;; 697 -> 698.5 F5
   ;; 770 -> 830 G#5

@@ -1,4 +1,6 @@
-(ns overblow.rhythm.perc)
+(ns overblow.rhythm.perc
+  (:use [overtone.live]
+        [overtone.inst.drum]))
 
 (defn pattern-to-times
   [pattern beat elements-per-beat metro]
@@ -121,7 +123,7 @@
 (defn start-pattern
   [pattern length metro]
   (let [start-beat (metro)]
-    (play-pattern #(pattern kick closed-hat noise-snare %1 metro) start-beat metro length)))
+    (play-pattern #(pattern kick closed-hat2 noise-snare %1 metro) start-beat metro length)))
 
 (start-pattern samba 4 metro)
 
