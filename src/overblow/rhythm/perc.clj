@@ -46,16 +46,41 @@
     (doseq [time hat-times] (at time (hat)))
     (doseq [time block-times] (at time (block)))))
 
+(defn sixteenth-off-beat
+  [bass hat snare beat metro]
+  (let [bass-pattern (flatten (repeat 2 [1 0 1 0]))
+        bass-times (pattern-to-times bass-pattern beat 1 metro)
+        snare-pattern (flatten (repeat 2 [0 1 0 1]))
+        snare-times (pattern-to-times snare-pattern beat 1 metro)
+        hat-pattern (take 16 (flatten (repeat 2 [1 1 1 1 1 1 1 1])))
+        hat-times (pattern-to-times hat-pattern beat 2 metro)]
+    (doseq [time bass-times] (at time (bass)))
+    (doseq [time snare-times] (at time (snare)))
+    (doseq [time hat-times] (at time (hat)))))
+
 (defn play-pattern
   " Repeats a pattern indefinitely. Starts immediately once called.
     pattern-length is the length of the pattern in beats. "
-  [fn beat metro pattern-length]
+  [pattern-fn beat metro pattern-length]
   (let [next-bar (+ beat pattern-length)]
-    (fn)
-    (apply-at (metro next-bar) play-pattern [fn next-bar metro pattern-length])))
+    (at (metro beat) (pattern-fn beat)) ; pattern-fn needs beat argument since apply-at will call it ~300ms before actual beat.
+    (apply-at (metro next-bar) #'play-pattern [pattern-fn next-bar metro pattern-length])))
 
-(play-pattern #(samba quick-kick closed-hat open-hat (metro) metro) (metro) metro 4)
+(defn start-pattern
+  [pattern length metro]
+  (let [start-beat (metro)]
+    (play-pattern #(pattern kick3 closed-hat noise-snare %1 metro) start-beat metro length)))
 
-(play-pattern #(bossa-nova quick-kick closed-hat open-hat (metro) metro) (metro) metro 8)
+(start-pattern samba 4 metro)
 
-(play-pattern #(reggae kick3 closed-hat noise-snare (metro) metro) (metro) metro 4)
+(start-pattern bossa-nova 8 metro)
+
+(start-pattern sixteenth-off-beat 7.75 metro)
+
+(start-pattern reggae 4 metro)
+
+(play-pattern #(samba quick-kick closed-hat open-hat %1 metro) (metro) metro 4)
+
+(play-pattern #(bossa-nova quick-kick closed-hat open-hat %1 metro) (metro) metro 8)
+
+(play-pattern #(reggae kick3 closed-hat noise-snare %1 metro) (metro) metro 4)
