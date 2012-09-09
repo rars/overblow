@@ -156,6 +156,11 @@
 
 (find-nearest 1230 (frequencies-in-chord (chord :c4 :major) 30 100))
 
+(defn dtmf-tuned-list
+  [freq-sequence chord min-note max-note]
+  (let [freq-set (frequencies-in-chord chord min-note max-note)]
+    (n-from-sequence (count freq-sequence) freq-set)))
+
 (defn dtmf-tuned
   [pairs chord min-note max-note]
   (let [freq-set (frequencies-in-chord chord min-note max-note)
@@ -233,3 +238,11 @@
   ;; 1209 -> 1397 F6
   ;; 1336 -> 1661 G#6
  ;; 1477 -> 2093 C7
+
+
+(defn n-from-sequence
+  [n sequence]
+  (let [length (count sequence)
+        indices (for [x (range n)] (Math/floor (* (- length 1) (/ x (- n 1)))))]
+    ; (clojure.pprint/pprint indices)
+    (for [x indices] (nth sequence x))))
