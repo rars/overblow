@@ -13,8 +13,16 @@
         e   (env-gen env :action FREE)]
     (out 0 (pan2 (* amp (* e (+ (sin-osc f1) (sin-osc f2))))))))
 
+(def dtmf-freqs [697 770 852 941 1209 1336 1477])
+
+(defn freq-grid [freqs]
+  (cons [(nth freqs 3) (nth freqs 5)]
+        (for [x (take 3 freqs)
+              y (drop 4 freqs)]
+          [x y])))
+
 ;; DTMF frequencies for each digit
-(def dtmf (cons [941 1336] (for [x [697 770 852] y [1209 1336 1477]] [x y])))
+(def dtmf (freq-grid dtmf-freqs))
 
 
 (defn play-dial-tone
@@ -58,8 +66,8 @@
   (+ (* alpha y) (* (- 1 alpha) x)))
 
 (defn dialtone-lookup-smoothed-freq
-  [alpha n]
-  (map (fn [x y] (lin-interpolate alpha x y)) (nth dtmf n) (nth dtmf-tuned n)))
+  [alpha n tuned-freq-grid]
+  (map (fn [x y] (lin-interpolate alpha x y)) (nth dtmf n) (nth tuned-freq-grid n)))
 
 (defn rising-edge
   "If n < wait returns 0, if n > (wait + transition) returns 1,
@@ -119,10 +127,11 @@
 
 (def tuning (atom 0))
 (def separation (atom 1))
+(def freq-grid (atom (dtmf-tuned dtmf (chord :f4 :major) 10 100)))
 
-(defn gen-smooth-dial-seq [alpha-atom]
+(defn gen-smooth-dial-seq [alpha-atom freq-grid]
   (map (fn [x]
-         (dialtone-lookup-smoothed-freq @alpha-atom x))
+         (dialtone-lookup-smoothed-freq @alpha-atom x @freq-grid))
        (repeatedly (fn [] (rand-int 10)))))
 
 (defn play-dial-tone
@@ -151,7 +160,7 @@
           (Thread/sleep 10))
         (reset! a target)))))
 
-(lin-ramp-atom tuning 3000 0)
+(lin-ramp-atom tuning 3000 1)
 
 (defn exp-ramp-atom [a duration target]
   (future
@@ -169,7 +178,7 @@
 
 (reset! tuning 0)
 (reset! separation 1)
-(play-dial-tone metro (metro) separation dtmf-synth (smooth-dial-seq tuning))
+(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning))
 
 (lin-ramp-atom tuning 10000 1)
 (exp-ramp-atom separation 10000 0.25)
