@@ -228,14 +228,14 @@
    [:hat (triplet-pat (repeat 8 [1 0 1])) 3]])
 
 
-(start-pattern samba-vary
-               4 metro instruments)
+(start-pattern samba
+               4 overblow.shared.core/metro instruments)
 
-(start-pattern bossa-nova 8 metro instruments)
+(start-pattern bossa-nova 4 metro instruments)
 
 (start-pattern sixteenth-off-beat 7.75 metro)
 
-(start-pattern blues-shuffle 4 metro)
+(start-pattern blues-shuffle 4 metro instruments)
 
 (start-pattern reggae 4 metro)
 
