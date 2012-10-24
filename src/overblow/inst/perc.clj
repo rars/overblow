@@ -2,7 +2,7 @@
   ^{:doc "Collection of percussion sounds."
     :author "Richard Russell"}
   overblow.inst.perc
-  (:require [overtone.core]))
+  (:use [overtone.core]))
 
 (defsynth kick [f 50]
   (let [noise-env (env-gen (envelope [0 0.3 0] [0.02 0.01]))
@@ -39,3 +39,15 @@
 (demo (snare1))
 
 (stop)
+
+(defsynth cymbal []
+  (let [env (env-gen (perc 0.01 0.2 1) :action FREE)
+        initial-env (env-gen (adsr 0.0 0.2 0.0 0.0))
+        carrier-freq 2500
+        modulator-freq 1000
+        pulse-carrier (pulse 2500)
+        pulse-modulator (pulse 1000)
+        attack-sig (* initial-env (bpf pulse-carrier
+                                       (+ carrier-freq (* 20000 initial-env))))
+        sig (* env attack-sig)]
+    (out 0 (pan2 sig))))
