@@ -229,7 +229,7 @@
 
 
 (start-pattern samba
-               4 overblow.shared.core/metro instruments)
+               4 metro instruments)
 
 (start-pattern bossa-nova 4 metro instruments)
 
