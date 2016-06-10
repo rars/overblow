@@ -1,4 +1,7 @@
-(ns overblow.alg.series)
+(ns
+  ^{:doc "Mathematical series."
+    :author "Richard Russell"}
+  overblow.alg.series)
 
 (defn arith-prog
   " Creates a lazy-seq of the arithmetic progression starting

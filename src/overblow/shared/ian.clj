@@ -8,8 +8,8 @@
         env (line:kr 1 1 duration FREE)]
     (out:kr out-bus (* (sin-osc:kr mod-freq)
                      ; (line:kr 0.9 1 duration)
-                     (/ (+ 1 (sin-osc:kr freq (/ (Math/PI) 2))) 2)
-                     ))))
+                     (/ (+ 1 (sin-osc:kr freq (/ (Math/PI) 2))) 2)))))
+
 
 (defsynth slider [freq1 220 freq2 880]
   (let [alpha (in:kr 80 1)

@@ -2,8 +2,7 @@
   ^{:doc "Collection of bass sounds."
     :author "Richard Russell"}
   overblow.inst.bass
-  (:require [overtone.core]))
-
+  (:use [overtone.core]))
 
 ; Note: use (adsr attack decay sustain release) to get an ADSR envelope
 
@@ -15,12 +14,9 @@
    decay 0.5
    sus 0.8
    rel 1.0]
-  (let [env (env-gen (adsr att decay sus rel) gate :action FREE)])
+;;  (let [env (env-gen (adsr att decay sus rel) gate :action FREE)])
   (mix [(square 120) (saw 123)])
-
   (sin-osc freq))
-
-
 
 (definst pluck-bass
   [freq 440]
@@ -36,24 +32,6 @@
 (defn play-bass [n]
   (our-bass (midi->hz (- n 12)) (midi->hz n) (midi->hz (+ n 7))))
 
-(def bass-riff
-  [(note :f#3)
-   (note :f#3)
-   [(note :f#3) (note :e3)]
-   [(note :d3) (note :f#3)]
-   nil
-   (note :f#3)
-   [(note :f#3) (note :e3)]
-   [(note :d3) (note :f#3)]
-   (note :e3)
-   (note :e3)
-   [(note :e3) (note :d3)]
-   [(note :c#3) (note :b2)]
-   nil
-   (note :b2)
-   [(note :b2) (note :d3)]
-   [(note :b2) (note :d3)]])
-
 (defn play-bass-riff [metro start-beat [next-note & riff]]
   (if (coll? next-note)
     (doseq [[i n] (map-indexed vector next-note)]
@@ -64,4 +42,4 @@
   (when riff
     (apply-at (metro (+ 1 start-beat)) play-bass-riff [metro (+ 1 start-beat) riff])))
 
-(play-bass-riff metro (next-bar-start (count bass-riff)) (apply concat (repeat bass-riff)))
+;(play-bass-riff metro (next-bar-start (count bass-riff)) (apply concat (repeat bass-riff)))

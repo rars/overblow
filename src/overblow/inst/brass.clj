@@ -2,7 +2,7 @@
   ^{:doc "Collection of brass-type sounds."
     :author "Richard Russell"}
   overblow.inst.brass
-  (:require [overtone.core]))
+  (:use [overtone.core]))
 
 ; TODO: a lot
 (defsynth trumpet [f1 50 amp 1 att 0.01 rel 1 level 1]
@@ -16,6 +16,3 @@
                (+ noise  (normalizer (rlpf:ar (saw f1)
                                               (* (+ 1.0 (* 0.5 growl-mod)) res-freq) Q))))]
     (out 0 (pan2 sig))))
-
-(demo (trumpet 250))
-(stop)

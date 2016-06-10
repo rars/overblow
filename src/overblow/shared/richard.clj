@@ -119,9 +119,6 @@
 
 ;;(play-accelerating-seq 0.25 1 5 0.1 10 10)
 
-
-(stop)
-
 ;; Auto freq lookup
 
 (defn note-to-all-octaves
@@ -221,14 +218,14 @@
         (reset! a target)))))
 
 
-(reset! tuning 0)
-(reset! separation 1)
-(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning tuned-freq-grid))
+;;(reset! tuning 0)
+;;(reset! separation 1)
+;;(play-dial-tone metro (metro) separation dtmf-synth (gen-smooth-dial-seq tuning tuned-freq-grid))
 
-(lin-ramp-atom tuning 5000 1)
-(exp-ramp-atom separation 10000 0.2)
+;;(lin-ramp-atom tuning 5000 1)
+;;(exp-ramp-atom separation 10000 0.2)
 
-(reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs (chord :f#4 :minor) 60 80)))
+;;(reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs (chord :f#4 :minor) 60 80)))
 
 
 (def piano-notes (atom #{}))
@@ -236,10 +233,10 @@
 (on-event [:midi :note-on] (fn [{note :note velocity :velocity timestamp :timestamp}]
                              (swap! piano-notes #(conj % note))
                              (reset! tuned-freq-grid (freq-grid (dtmf-tuned-list dtmf-freqs @piano-notes (apply min @piano-notes) (apply max @piano-notes))))
-                             (println @piano-notes)
-                             )
+                             (println @piano-notes))
+
           ::echo)
 
 (on-event [:midi :note-off] (fn [event]
-                            (swap! piano-notes #(disj % (:note event))))
+                             (swap! piano-notes #(disj % (:note event))))
                             ::midi-note-up-hdlr)

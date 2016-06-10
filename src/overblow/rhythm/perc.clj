@@ -1,8 +1,8 @@
-(ns overblow.rhythm.perc
-  (:use [overtone.live]
-        [overtone.inst.drum]))
-
-(def metro (metronome 128))
+(ns
+  ^{:doc "Percussive sounds."
+    :author "Richard Russell"}
+  overblow.rhythm.perc
+  (:use [overtone.core]))
 
 (defn shat1 [] (sample-player (sample (freesound-path 3721))))
 
@@ -25,12 +25,13 @@
    :bongo-large bongo2
    :scrape [bongo1 bongo3 bongo4 bongo5 bongo6 bongo7]})
 
-(def instruments {:bass kick :block noise-snare :hat closed-hat :snare noise-snare})
+;(def instruments {:bass kick :block noise-snare :hat closed-hat :snare noise-snare})
 
-(def vary-instruments
-  {:bass kick
-   :snares [ssnare1 ssnare2 ssnare4 ssnare5]
-   :hats [shat1]})
+;(def vary-instruments
+ ;{:bass kick
+; :snares [ssnare1 ssnare2 ssnare4 ssnare5]
+; :hats [shat1]
+;})
 
 (defn pattern-to-times
   " Converts a pattern expressed as a sequence of 0s and 1s to a
@@ -228,19 +229,19 @@
    [:hat (triplet-pat (repeat 8 [1 0 1])) 3]])
 
 
-(start-pattern samba
-               4 metro instruments)
+; (start-pattern samba
+;               4 metro instruments)
 
-(start-pattern bossa-nova 4 metro instruments)
+;(start-pattern bossa-nova 4 metro instruments)
 
-(start-pattern sixteenth-off-beat 7.75 metro)
+;(start-pattern sixteenth-off-beat 7.75 metro)
 
-(start-pattern blues-shuffle 4 metro instruments)
+;(start-pattern blues-shuffle 4 metro instruments)
 
-(start-pattern reggae 4 metro)
+;(start-pattern reggae 4 metro)
 
-(play-pattern #(samba quick-kick closed-hat open-hat %1 metro) (metro) metro 4)
+;(play-pattern #(samba quick-kick closed-hat open-hat %1 metro) (metro) metro 4)
 
-(play-pattern #(bossa-nova quick-kick closed-hat open-hat %1 metro) (metro) metro 8)
+;(play-pattern #(bossa-nova quick-kick closed-hat open-hat %1 metro) (metro) metro 8)
 
-(play-pattern #(funky kick3 closed-hat ssnare3 %1 metro) (metro) metro 4)
+;(play-pattern #(funky kick3 closed-hat ssnare3 %1 metro) (metro) metro 4)

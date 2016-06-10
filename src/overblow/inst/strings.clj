@@ -1,4 +1,4 @@
- (ns
+(ns
   ^{:doc "Collection of string sounds."
     :author "Richard Russell"}
   overblow.inst.strings
@@ -11,8 +11,6 @@
         vco2 (saw (* f 1.01))
         sig (mix [(* env1 vco1) (* env2 vco2)])]
     (out 0 (pan2 sig))))
-
-(demo (string1 790))
 
 (defsynth string2 [f 62]
   (let [
@@ -30,8 +28,6 @@
 
     (out 0 (pan2 sig))))
 
-(demo (string3 1100))
-
 (defsynth super-string [f 62 amp 1.0]
   (let [mod1 (lf-tri 5)
         vco1 (pulse f (+ 0.275 (* mod1 0.225)))
@@ -42,8 +38,3 @@
         vco3 (saw (vibrato (* f 0.99) 5 0.02))
         sig (mix [(* env1 vco1) (* env2 vco2) (* env2 vco3)])]
     (out 0 (pan2 sig))))
-
-(demo (super-string 820))
-
-(demo (mix [(super-string 620) (super-string 720
-                                             )]))

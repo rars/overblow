@@ -7,3 +7,7 @@
 /.lein-failures
 /checkouts
 /.lein-deps-sum
+
+# Local state
+.lein-repl-history
+.nrepl-port

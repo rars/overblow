@@ -14,8 +14,6 @@
                                                    (* f (+ 1 (* 0.12 pitch)))))]))]
     (out 0 (pan2 sig))))
 
-(demo (kick 52))
-
 ; Passes a signal through a series of band reject filters
 (defmacro sig-bandreject-freq [sig freqs]
   (let [brfilter (fn [x y] (list 'brf:ar x y 5))]
@@ -48,16 +46,6 @@
                   (freq-shift tosc 175) (freq-shift tosc 224)])]
     (out 0 (pan2 (* env sig)))))
 
-(demo (snare-additive))
-(demo (snare-additive2))
-
-(gen-snare snare1 60 200)
-(gen-snare snare1 90 200)
-(gen-snare snare1 120 200)
-(demo (snare1))
-
-(stop)
-
 (defsynth cymbal []
   (let [env (env-gen (perc 0.01 0.75 1) :action FREE)
         initial-env (env-gen (adsr 0.0 0.2 0.0 0.0))
@@ -71,5 +59,3 @@
         higherpass-sig (hpf pulse-carrier (+ carrier-freq (* 20000 higherpass-env)))
         sig (* env (mix [attack-sig higherpass-sig]))]
     (out 0 (pan2 sig))))
-
-(demo (cymbal))

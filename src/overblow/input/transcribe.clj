@@ -1,7 +1,7 @@
 (ns
-    ^{:doc "Collection of methods for making it convenient to express
-            musical forms."
-      :author "Ian Davies"}
+  ^{:doc "Collection of methods for making it convenient to express
+          musical forms."
+    :author "Ian Davies"}
   overblow.input.transcribe)
 
 (defmacro note-transcribe
