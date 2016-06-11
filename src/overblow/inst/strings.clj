@@ -13,8 +13,7 @@
     (out 0 (pan2 sig))))
 
 (defsynth string2 [f 62]
-  (let [
-        vco1 (saw (vibrato f 5 0.02))
+  (let [vco1 (saw (vibrato f 5 0.02))
         vco2 (saw (* f 1.01))
         env (env-gen (perc 0.2 1.0) :action FREE)
         sig (mix [vco1 vco2])]
