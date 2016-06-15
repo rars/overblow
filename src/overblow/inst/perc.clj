@@ -4,12 +4,12 @@
   overblow.inst.perc
   (:use [overtone.core]))
 
-(defsynth kick [f 50]
+(defsynth kick [f 50 amp 1]
   (let [noise-env (env-gen (envelope [0 0.1 0] [0.02 0.01]))
         noise (* noise-env (normalizer (pink-noise)))
         pitch-env (env-gen (envelope [0 1 0] [0.02 0.5]))
         pitch (+ noise-env pitch-env)
-        env (env-gen (perc 0.05 0.1 1 -5) :action FREE)
+        env (env-gen (perc 0.05 0.1 amp -5) :action FREE)
         sig (* env (mix [noise (normalizer (lpf:ar (saw f)
                                                    (* f (+ 1 (* 0.12 pitch)))))]))]
     (out 0 (pan2 sig))))
